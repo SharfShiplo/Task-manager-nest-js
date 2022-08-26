@@ -13,6 +13,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { UserEntity } from 'src/auth/entities/user.entity';
+import { GetUser } from 'src/auth/get-user.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTaskFilterDto } from './dto/get-task-filter.dto';
 import { TaskEntity } from './entities/task.entity';
@@ -28,33 +30,42 @@ export class TasksController {
   @Get()
   async getTasks(
     @Query(ValidationPipe) filterDto: GetTaskFilterDto,
+    @GetUser() user: UserEntity,
   ): Promise<TaskEntity[]> {
-    return await this.tasksService.getAllTasks(filterDto);
+    return await this.tasksService.getAllTasks(filterDto, user);
   }
 
   @Get('/:id')
   async getTaskById(
     @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: UserEntity,
   ): Promise<TaskEntity> {
-    return await this.tasksService.getTaskById(id);
+    return await this.tasksService.getTaskById(id, user);
   }
 
   @Post()
   @UsePipes(ValidationPipe)
-  async createTask(@Body() createTaskDto: CreateTaskDto): Promise<TaskEntity> {
-    return await this.tasksService.createTask(createTaskDto);
+  async createTask(
+    @Body() createTaskDto: CreateTaskDto,
+    @GetUser() user: UserEntity,
+  ): Promise<TaskEntity> {
+    return await this.tasksService.createTask(createTaskDto, user);
   }
 
   @Patch('/:id/status')
   async updateTaskStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+    @GetUser() user: UserEntity,
   ): Promise<TaskEntity> {
-    return await this.tasksService.updateTaskStatus(id, status);
+    return await this.tasksService.updateTaskStatus(id, status, user);
   }
 
   @Delete('/:id')
-  async deleteTaskById(@Param('id', ParseIntPipe) id: number): Promise<string> {
-    return await this.tasksService.deleteTaskById(id);
+  async deleteTaskById(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: UserEntity,
+  ): Promise<string> {
+    return await this.tasksService.deleteTaskById(id, user);
   }
 }
